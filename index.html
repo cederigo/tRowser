@@ -1,0 +1,140 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <title>tRowser</title>
+  <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>  
+  <style type="text/css" media="screen">
+    @import "iui/iui.css";
+    @import "iui/t/default/default-theme.css";
+    /*
+    @import "iui/t/defaultgrad/defaultgrad-theme.css";    
+    @import "iui/t/ipdc/ipdc-theme.css";    
+    */
+    
+    .se-details{
+      font-weight: normal;
+      font-size: small;
+    }  
+  </syle>  
+  </style>
+  <script type="application/x-javascript" src="iui/iui.js"></script>
+  <script type="application/x-javascript" src="js/main.js"></script>
+  <script type="application/x-javascript" src="js/jquery-1.4.2.min.js"></script>  
+  <script type="text/javascript">  
+    
+    $(document).ready(function() {
+      init();      
+    });
+    var t;
+    var isoHuntEngine;
+    
+    function init(){    
+    
+      t = new tRowser();
+      isoHuntEngine = new isoHuntEngine(t);
+      /*maybe more engines*/
+      t.log("init");
+      t.setCallback( function ( sr ){
+        if(sr){        
+          t.log("got: "+sr.title);          
+          var pageTitle = $("#pageTitle").text();          
+          $("#pageTitle").text(pageTitle+" ("+sr.totalResults+")");          
+          var container = $("#tResult");
+          $('<li><a href="#">'+sr.title+'</a></li>').appendTo(container);          
+          for ( key in sr.entries ){
+            var se = sr.entries[key];            
+            $('<li><a href="'+se.torrentLink+'">'+se.title+'</a>'+
+              '<div class="se-details">'+'size:'+se.size+', seeds:'+se.seeds+', leechers:'+se.leechers+'</div>'+
+              '</li>').appendTo(container);
+            
+          }
+	      }
+        else{
+          alert("someting went wrong");
+        }  
+        
+        $("#loading").hide();
+          
+      });
+     }
+
+    function clearSearch(){
+      
+      t.log("clear search");
+    
+      var e = $('[selected="true"]');
+      if(e){
+        var id = e.attr("id");
+        t.log(id);
+        if(id == "tResult")
+          e.empty();
+      }
+    }
+    
+    function submitSearch(){
+      
+      $("#loading").show();
+      
+      var engine = $("#engine").val();
+      var what   = $("#what").val();
+      var query  = $("#q").val();
+      
+      t.log("search: enginge="+engine+", what="+what+", q="+query);
+      
+      t.search(isoHuntEngine,query,what);
+      
+      return false;
+      
+    }  
+    
+    
+  </script>
+</head>
+
+<body>
+    <div class="toolbar">
+        <div id="loading" style="display: none; background-image: url(img/loading.gif); width:16px; height:16px; position:absolute; top: 10px; right: 10px;"></div>
+        <h1 id="pageTitle"></h1>
+        <a id="backButton" class="button" onclick="clearSearch();"></a>
+    </div>
+    
+    <ul id="home" title="tRowser" selected="true">
+    <li><a href="#tSearch">Search Torrents</a></li>
+    <li><a href="#dManager">Download Manager</a></li>
+    </ul>
+    
+    <ul id="tResult" title="tResult"></ul>
+    
+    <div id="dManager" title="Download Manager">
+      <iframe url="http://cederigo.ath.cx"></iframe>
+    </div>
+    
+    <div id="tSearch" title="tSearch" class="panel">
+      <fieldset>        
+        <div class="row">
+          <label>Engine</label>
+          <select name="engine" id="engine">
+            <option value="isohunt">isohunt</option>
+          </select>
+        </div>
+        <div class="row">   
+          <label>What</label>
+          <select name="what" id="what">
+            <option value="movies">movies</option>
+          </select>                          
+        </div>
+        <div class="row">
+          <label>Query</label>
+          <input type="text" id="q" name="q" value=""/>
+        </div>
+        <div class="row">        
+          <a class="button leftButton" type="cancel">Cancel</a>
+          <a class="button blueButton" href="#tResult" onclick="submitSearch();" >Search</a>
+        </div>
+      </fieldset>    
+    </div>
+    
+</body>
+
+</html>

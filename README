@@ -1,0 +1,8 @@
+search for torrents on an nice interface for mobile phones
+
+intended to be deployed on a router running openwrt with
+torrent-client.
+
+
+#torrent search sites implemented so far:
+ - isohunt.com (using json interface)
