@@ -2,6 +2,7 @@
 
 import os
 import cgi
+import urllib2
 from urllib2 import URLError,Request,urlopen
 import cgitb
 
@@ -25,13 +26,18 @@ req = Request(url)
 req.add_header("user-agent","tRowser-Proxy")
 req.add_header("cache-control","no-cache")
 req.add_header("pragma","no-cache")
+
 #original headers
 for k, v in reqheaders.iteritems():
   req.add_header(k,v)
-try:
-    resp = urlopen(req)
-except URLError, e:    
-    resp = e
+
+opener = urllib2.build_opener(urllib2.HTTPRedirectHandler)
+
+resp = opener.open(req);
+#try:
+#    resp = opener.open(req)
+#except URLError, e:        
+#    resp = e
 
 headers = resp.info()
 body = resp.read()
@@ -44,13 +50,7 @@ for key in headers.keys():
 print
 
 #body
-print body
-for k, v in reqheaders.iteritems():
-  print "%s,%s"%(k,v)
-
-
-
- 
+print body 
 
 
 

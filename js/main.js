@@ -8,9 +8,9 @@ Function.prototype.bind = function( obj ) {
 //default implementation isohunt
 function isoHuntEngine(tRowser){
   this.t = tRowser;
-  this.baseURL = "http://isohunt.com/js/json.php?";
-  this.search = function (query, what ) {
-    
+  /*configure your reverse proxy to forward /isohunt/ to isohunt.com*/  
+  this.baseURL = "/isohunt/js/json.php?";
+  this.search = function (query, what ) {    
     this.t.log("search from iso engine");
     
     var url = this.baseURL+"ihq="+escape(query)+"&start=0&rows=25&sort=seeds";
@@ -58,9 +58,7 @@ function isoHuntEngine(tRowser){
 
 
 function tRowser(){
-  this.se = new isoHuntEngine(this);
-  this.useProxy = true;
-  this.proxy = "http://wilmots/cgi-bin/proxy?url=";
+  this.se = new isoHuntEngine(this);    
   this.searchCallback = function ( r ) { alert("r: "+r); };
   this.xhr;
   
@@ -83,11 +81,8 @@ function tRowser(){
     this.xhr = new XMLHttpRequest();
     this.xhr.onreadystatechange = this.handler.bind(this);
     
-    var url = _url;
-    
-    if(this.useProxy){
-      url = this.proxy+escape(_url);
-    }       
+    var url = _url;    
+          
     this.xhr.open("GET", url);
     this.xhr.send();
     

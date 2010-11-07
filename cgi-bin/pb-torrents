@@ -1,0 +1,65 @@
+#!/bin/sh
+
+CAT_AUDIO=100
+CAT_MOVIES=200
+CAT_APPS=300
+CAT_GAMES=400
+
+if [ "$1" ==  "--help" ]
+then
+ echo "usage: \t$0 [-c cat] [-s search]"
+ echo " \t-s \tif specified looks for searchtem  otherwise top100"
+ echo " \t-c \tcategory ([movies],audio,apps,games)"
+ exit 1
+fi
+
+ARGS_LEN=$#
+
+shift
+
+case "$1" in
+ 'audio')
+ CAT=$CAT_AUDIO
+ ;;
+ 'movies')
+ CAT=$CAT_MOVIES
+ ;;
+ 'apps')
+ CAT=$CAT_APPS
+ ;;
+ 'games')
+ CAT=$CAT_GAMES
+ ;;
+ *)
+ #default
+ CAT=$CAT_MOVIES
+ ;;
+esac
+
+shift
+
+if [ $ARGS_LEN -gt 3 ]
+then 
+  shift
+  WGET_URL="http://thepiratebay.org/search/$*/0/99/$CAT"
+else
+  WGET_URL="http://thepiratebay.org/top/$CAT"
+fi
+
+
+echo "HTTP/1.0 200 OK
+Content-Type: text/html
+ 
+"
+echo '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">'
+echo "<html><head><title>$WGET_URL</title></head>"
+echo "<body>"
+
+wget -q -O - $WGET_URL \
+	| grep -E '<div class="detName">(.*)<\/div>' \
+	| awk -F\" '{ print $4 }' \
+	| awk -F/ '{ print "<a href=\"http://torrents.thepiratebay.org/"$3"/"$4".TPB.torrent\">"$4"</a></br>" }' \
+	
+
+echo "</body>"
+echo "</html>"

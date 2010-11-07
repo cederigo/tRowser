@@ -1,5 +1,3 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <title>tRowser</title>
@@ -27,6 +25,7 @@
       init();      
     });
     var t;
+    var sessionId;
     var isoHuntEngine;
     
     function init(){    
@@ -35,6 +34,8 @@
       isoHuntEngine = new isoHuntEngine(t);
       /*maybe more engines*/
       t.log("init");
+      //addTorrent("gagi");
+
       t.setCallback( function ( sr ){
         if(sr){        
           t.log("got: "+sr.title);          
@@ -44,7 +45,7 @@
           $('<li><a href="#">'+sr.title+'</a></li>').appendTo(container);          
           for ( key in sr.entries ){
             var se = sr.entries[key];            
-            $('<li><a href="'+se.torrentLink+'">'+se.title+'</a>'+
+            $('<li><a href="#" onclick="addTorrent(gagi);">'+se.title+'</a>'+
               '<div class="se-details">'+'size:'+se.size+', seeds:'+se.seeds+', leechers:'+se.leechers+'</div>'+
               '</li>').appendTo(container);
             
@@ -70,6 +71,48 @@
         if(id == "tResult")
           e.empty();
       }
+    }
+
+    function addTorrent(url){
+      
+      var torrent_link = "http://isohunt.com/download/140642685/test.torrent"
+      var transmission = "/transmission/rpc"
+      
+      /*session id*/
+      if(!sessionId){
+        $.ajax({	   
+          url: test_url,
+          async: false,	          
+          complete: function (xhr,textStatus){
+	        t.log("text-status: "+textStatus);
+      		  if(xhr){
+      		    sessionId = xhr.getResponseHeader("X-Transmission-Session-Id");
+      		    t.log("session-id:"+sessionId);              
+	          }
+	        }
+        });	      
+      }
+      
+      $.ajaxSetup({
+        beforeSend: function(xhr){
+          t.log("setting session-id header");			 
+          xhr.setRequestHeader("X-Transmission-Session-Id",sessionId);          
+        }
+      })
+      var json_body = '{"method":"torrent-add","arguments":{"paused":false,"filename":"'+torrent_link+'"}}'     
+      
+      $.ajax({
+        url:test_url,
+        type:'POST',        
+        data:json_body,
+        dataType:'json',
+        error: function (xhr,err,ex){
+	        t.log("error: "+err);
+	      },
+        success: function (data,xhr){
+	        t.log("success:"+data);
+	      }
+      });	
     }
     
     function submitSearch(){
@@ -101,14 +144,12 @@
     
     <ul id="home" title="tRowser" selected="true">
     <li><a href="#tSearch">Search Torrents</a></li>
-    <li><a href="#dManager">Download Manager</a></li>
+    <li><a target="_webapp" href="http://openwrt:9091/">Download Manager</a></li>
+    <li><div onclick="addTorrent('somewhat');return false;">queue torrent url</div></li>
     </ul>
     
     <ul id="tResult" title="tResult"></ul>
     
-    <div id="dManager" title="Download Manager">
-      <iframe url="http://cederigo.ath.cx"></iframe>
-    </div>
     
     <div id="tSearch" title="tSearch" class="panel">
       <fieldset>        
