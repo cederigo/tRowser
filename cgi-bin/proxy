@@ -1,32 +1,40 @@
 #!/usr/bin/python
 
+import os
 import cgi
-import urllib
-import urllib2
+from urllib2 import URLError,Request,urlopen
 import cgitb
 
 cgitb.enable()
-
-urllib.urlcleanup()
-
 url = "http://localhost"
-
 params = cgi.FieldStorage()
-
+#collect request headers
+reqheaders = dict();
+for param in os.environ.keys():
+    if ( param.startswith("HTTP")):
+      val = os.environ[param]
+      key = param.replace("HTTP_","",1)
+      key = key.replace("_","-")            
+      reqheaders[key] = val     
 
 if "url" in params:
   url = params["url"].value
-  
-#get the url
-req = urllib2.Request(url)
-req.add_header("user-agent","tinyproxy")
+
+#build request
+req = Request(url)
+req.add_header("user-agent","tRowser-Proxy")
 req.add_header("cache-control","no-cache")
 req.add_header("pragma","no-cache")
-resp = urllib2.urlopen(req)
+#original headers
+for k, v in reqheaders.iteritems():
+  req.add_header(k,v)
+try:
+    resp = urlopen(req)
+except URLError, e:    
+    resp = e
 
 headers = resp.info()
 body = resp.read()
-
 
 headers["transfer-encoding"] = ""
 
@@ -37,6 +45,11 @@ print
 
 #body
 print body
+for k, v in reqheaders.iteritems():
+  print "%s,%s"%(k,v)
+
+
+
  
 
 
